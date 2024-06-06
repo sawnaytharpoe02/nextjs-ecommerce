@@ -14,7 +14,7 @@ export default function RootLayout({
         <NavLink href="/admin/customers">Customers</NavLink>
         <NavLink href="/admin/orders">Sales</NavLink>
       </Nav>
-      {children}
+      <div className="p-10">{children}</div>
     </div>
   );
 }
