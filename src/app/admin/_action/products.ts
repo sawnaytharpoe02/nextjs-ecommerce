@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import db from "@/db";
 import fs from "fs/promises";
@@ -44,6 +44,7 @@ export const addProduct = async (formData: FormData) => {
 
   await db.product.create({
     data: {
+      isAvailableForPurchase: false,
       name: data.name,
       priceInCents: data.priceInCents,
       description: data.description,
@@ -54,3 +55,28 @@ export const addProduct = async (formData: FormData) => {
 
   redirect("/admin/products");
 };
+
+export async function toggleProductAvailability(
+  id: string,
+  isAvailableForPurchase: boolean
+) {
+  const product = await db.product.findUnique({ where: { id } });
+  if (!product) return notFound();
+
+  await db.product.update({
+    where: { id },
+    data: {
+      isAvailableForPurchase,
+    },
+  });
+}
+
+export async function DeleteProduct(id: string) {
+  const product = await db.product.findUnique({ where: { id } });
+  if (!product) return notFound();
+
+  await db.product.delete({ where: { id } });
+
+  fs.unlink(product.filePath);
+  fs.unlink(`public${product.imagePath}`);
+}

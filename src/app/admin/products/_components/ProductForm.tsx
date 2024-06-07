@@ -7,6 +7,7 @@ import { formatNumber } from "@/utils/formatters";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { addProduct } from "@/app/admin/_action/products";
+import { useFormStatus } from "react-dom";
 
 const ProductForm = () => {
   const [priceInCents, setPriceInCents] = useState<number | undefined>();
@@ -49,10 +50,20 @@ const ProductForm = () => {
           <Input type="file" id="img" name="img" />
         </div>
 
-        <Button type="submit">Save</Button>
+        <SubmitButton />
       </form>
     </div>
   );
 };
 
 export default ProductForm;
+
+const SubmitButton = () => {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? "Saving..." : "Save"}
+    </Button>
+  );
+};
