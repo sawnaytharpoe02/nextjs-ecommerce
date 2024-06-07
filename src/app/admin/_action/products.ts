@@ -4,28 +4,35 @@ import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import db from "@/db";
 import fs from "fs/promises";
+import { revalidatePath } from "next/cache";
 
-const fileSchema = z.instanceof(File, { message: "required" });
+const fileSchema = z.instanceof(File, { message: "Required" });
 const imageSchema = fileSchema.refine(
   (file) => file.size === 0 || file.type.startsWith("image/"),
   {
-    message: "required",
+    message: "Required",
   }
 );
 
 const addSchema = z.object({
-  name: z.string().min(1),
-  priceInCents: z.coerce.number().int().min(1),
-  description: z.string().min(1),
-  file: fileSchema.refine((file) => file.size > 0, "required file"),
-  img: imageSchema.refine((file) => file.size > 0, "required image"),
+  name: z.string().min(1, { message: "Name is required." }),
+  priceInCents: z.coerce
+    .number()
+    .gt(0, { message: "Please enter an amount greater than $0." }),
+  description: z.string().min(1, { message: "Description is required." }),
+  file: fileSchema.refine((file) => file.size > 0, "Required file."),
+  img: imageSchema.refine((file) => file.size > 0, "Required image."),
 });
 
-export const addProduct = async (formData: FormData) => {
+const updateSchema = addSchema.extend({
+  file: fileSchema.optional(),
+  img: imageSchema.optional(),
+});
+
+export const addProduct = async (prevState: unknown, formData: FormData) => {
   const result = addSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (result.success === false) {
-    console.log(result.error.formErrors.fieldErrors);
     return result.error.formErrors.fieldErrors;
   }
 
@@ -53,6 +60,7 @@ export const addProduct = async (formData: FormData) => {
     },
   });
 
+  revalidatePath("/admin/products");
   redirect("/admin/products");
 };
 
@@ -79,4 +87,52 @@ export async function DeleteProduct(id: string) {
 
   fs.unlink(product.filePath);
   fs.unlink(`public${product.imagePath}`);
+}
+
+export async function updateProduct(
+  id: string,
+  prevState: unknown,
+  formData: FormData
+) {
+  const result = updateSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!result.success) {
+    return result.error.formErrors.fieldErrors;
+  }
+
+  const product = await db.product.findUnique({ where: { id } });
+  if (!product) return notFound();
+
+  const data = result.data;
+
+  let filePath = product.filePath;
+  if (data.file != null && data.file.size > 0) {
+    fs.unlink(product.filePath);
+    filePath = `products/${crypto.randomUUID()}-${data.file.name}`;
+    await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()));
+  }
+
+  let imagePath = product.imagePath;
+  if (data.img != null && data.img.size > 0) {
+    fs.unlink(product.imagePath);
+    imagePath = `/products/${crypto.randomUUID()}-${data.img.name}`;
+    await fs.writeFile(
+      `public${imagePath}`,
+      Buffer.from(await data.img.arrayBuffer())
+    );
+  }
+
+  await db.product.update({
+    where: { id },
+    data: {
+      name: data.name,
+      priceInCents: data.priceInCents,
+      description: data.description,
+      filePath,
+      imagePath,
+    },
+  });
+
+  revalidatePath("/admin/products");
+  redirect("/admin/products");
 }

@@ -20,7 +20,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -30,6 +29,8 @@ import {
   ActivateToggleDropDownItem,
   DeleteDropDownItem,
 } from "./_components/ProductActions";
+
+export const dynamic = "force-dynamic";
 
 const ProductsPage = () => {
   return (
@@ -56,7 +57,13 @@ export const ProductsTable = async () => {
       priceInCents: true,
       _count: { select: { orders: true } },
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
+
+  if (products.length === 0) return <div>Products not found.</div>;
+
   return (
     <Table>
       <TableHeader>
@@ -91,8 +98,8 @@ export const ProductsTable = async () => {
                   <DotsVerticalIcon />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <a href={`/admin/products/${product.id}/download`}>
+                  <DropdownMenuItem asChild>
+                    <a download href={`/admin/products/${product.id}/download`}>
                       Download
                     </a>
                   </DropdownMenuItem>
