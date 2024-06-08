@@ -7,6 +7,7 @@ import fs from "fs/promises";
 import { revalidatePath } from "next/cache";
 
 const fileSchema = z.instanceof(File, { message: "Required" });
+  
 const imageSchema = fileSchema.refine(
   (file) => file.size === 0 || file.type.startsWith("image/"),
   {
@@ -60,7 +61,9 @@ export const addProduct = async (prevState: unknown, formData: FormData) => {
     },
   });
 
-  revalidatePath("/admin/products");
+  revalidatePath("/");
+  revalidatePath("/products")
+
   redirect("/admin/products");
 };
 
@@ -133,6 +136,8 @@ export async function updateProduct(
     },
   });
 
-  revalidatePath("/admin/products");
+  revalidatePath("/");
+  revalidatePath("/products")
+
   redirect("/admin/products");
 }
