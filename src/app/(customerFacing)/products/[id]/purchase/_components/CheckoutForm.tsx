@@ -96,10 +96,11 @@ const Form = ({ productId, priceInCents }: FormProps) => {
       return;
     }
 
+    const appUrl = process.env.NEXT_PULIC_APP_URL || 'http://localhost:3000';
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${process.env.NEXT_PULIC_APP_URL}/products/${productId}/purchase/success`,
+        return_url: `${appUrl}/stripe/purchase-success`,
       },
     });
 
@@ -131,8 +132,7 @@ const Form = ({ productId, priceInCents }: FormProps) => {
         <CardFooter>
           <Button
             className="w-full mt-4"
-            disabled={isLoading || !stripe || !elements}
-            id="submit">
+            disabled={isLoading || !stripe || !elements}>
             {isLoading
               ? "Purchasing ..."
               : `Purchase - ${formatCurrency(priceInCents / 100)}`}
@@ -142,3 +142,6 @@ const Form = ({ productId, priceInCents }: FormProps) => {
     </form>
   );
 };
+
+
+
