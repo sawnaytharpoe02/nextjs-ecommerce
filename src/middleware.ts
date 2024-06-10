@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { array } from "zod";
 import { isValidPassword } from "./utils/isValidPassword";
 
 export async function middleware(req: NextRequest) {
@@ -25,8 +24,6 @@ async function isAuthenticate(req: NextRequest) {
   )
     .toString()
     .split(":");
-
-  console.log(username, password);
 
   return (
     username === process.env.ADMIN_USERNAME && (await isValidPassword(password))

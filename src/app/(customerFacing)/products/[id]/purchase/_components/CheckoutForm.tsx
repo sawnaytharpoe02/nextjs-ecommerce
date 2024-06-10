@@ -91,12 +91,14 @@ const Form = ({ productId, priceInCents }: FormProps) => {
     const orderExists = await userOrderExists(productId, email);
 
     if (orderExists) {
-      setErrorMessage("You have already purchased this product.");
+      setErrorMessage(
+        "You have already purchased this product. Try downloading it from the My Orders page"
+      );
       setIsLoading(false);
       return;
     }
 
-    const appUrl = process.env.NEXT_PULIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.NEXT_PULIC_APP_URL || "http://localhost:3000";
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -142,6 +144,3 @@ const Form = ({ productId, priceInCents }: FormProps) => {
     </form>
   );
 };
-
-
-

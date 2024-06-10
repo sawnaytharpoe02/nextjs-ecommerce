@@ -1,5 +1,4 @@
 import db from "@/db";
-import { notFound } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 
@@ -16,7 +15,9 @@ export async function GET(
     },
   });
 
-  if (!data) return notFound();
+  if (data == null){
+    return NextResponse.redirect(new URL('/products/download/expired', req.url))
+  }
 
   const { size } = await fs.stat(data.product.filePath);
   const file = await fs.readFile(data.product.filePath);
