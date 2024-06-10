@@ -56,7 +56,7 @@ export default async function DashboardPage() {
     <div className="container my-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <DashboardCard
         title="Sales"
-        subtitle={`${formatNumber(salesData.totalSales)} Ordres`}
+        subtitle={`${formatNumber(salesData.totalOrders)} Orders`}
         body={formatCurrency(salesData.totalOrders)}
       />
       <DashboardCard
