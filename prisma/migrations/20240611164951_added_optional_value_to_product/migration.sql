@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Product" ALTER COLUMN "filePath" DROP NOT NULL,
+ALTER COLUMN "imagePath" DROP NOT NULL;

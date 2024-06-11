@@ -13,19 +13,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Product {
-  id                     String                 @id @default(uuid())
+  id                     String   @id @default(uuid())
   name                   String
   priceInCents           Int
-  filePath               String
-  imagePath              String
+  filePath               String?
+  imagePath              String?
   description            String
-  isAvailableForPurchase Boolean                @default(true)
-  createdAt              DateTime               @default(now())
-  updatedAt              DateTime               @updatedAt
+  isAvailableForPurchase Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
-  orders Order[]
+  orders                Order[]
   downloadVerifications DownloadVerification[]
 }
 
@@ -44,17 +43,17 @@ model Order {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  userId String
+  userId    String
   productId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 }
 
 model DownloadVerification {
   id        String   @id @default(uuid())
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
+
   productId String
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
