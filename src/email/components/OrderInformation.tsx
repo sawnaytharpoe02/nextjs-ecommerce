@@ -7,12 +7,9 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import type { PurchaseReceiptEmailTemplateProps } from "../PurchaseReceiptEmailTemplate";
 
-type OrderInformationProps = {
-  order: { id: string; createdAt: Date; pricePaidInCents: number };
-  product: { imagePath: string; name: string; description: string };
-  downloadVerificationId: string;
-};
+interface OrderInformationProps extends PurchaseReceiptEmailTemplateProps {}
 
 const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
 

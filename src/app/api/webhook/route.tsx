@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import db from "@/db";
 import Stripe from "stripe";
 import { Resend } from "resend";
+import PurchaseReceiptEmailTemplate from "@/email/PurchaseReceiptEmailTemplate";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {});
 const resend = new Resend(process.env.RESEND_API_KEY as string);
@@ -9,8 +10,9 @@ const resend = new Resend(process.env.RESEND_API_KEY as string);
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature") as string;
-  const webhookSecret =
-    "whsec_dafab56c04fbf87b22e5ece068e98e924ad81cf74bda0b14c26b10108f9ab3c9";
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
+
+  
   let event: Stripe.Event;
   try {
     if (!sig || !webhookSecret)
@@ -62,10 +64,16 @@ export async function POST(req: NextRequest) {
       });
 
       await resend.emails.send({
-        from: `Support <onboarding@resend.dev>`,
+        from: `Support <${process.env.SENDER_EMAIL}>`,
         to: email,
         subject: "Order Confirmation",
-        react: <h1>Hi, this is your order confirmation</h1>,
+        react: (
+          <PurchaseReceiptEmailTemplate
+            order={order}
+            product={product}
+            downloadVerificationId={downloadVerification.id}
+          />
+        ),
       });
 
       return new NextResponse(null, { status: 200 });

@@ -10,19 +10,15 @@ import {
 } from "@react-email/components";
 import { OrderInformation } from "./components/OrderInformation";
 
-type PurchaseReceiptEmailTemplateProps = {
-  product: {
-    name: string;
-    imagePath: string;
-    description: string;
-  };
+export type PurchaseReceiptEmailTemplateProps = {
   order: { id: string; createdAt: Date; pricePaidInCents: number };
+  product: { imagePath: string; name: string; description: string };
   downloadVerificationId: string;
 };
 
 const PurchaseReceiptEmailTemplate = ({
-  product,
   order,
+  product,
   downloadVerificationId,
 }: PurchaseReceiptEmailTemplateProps) => {
   return (
