@@ -6,7 +6,6 @@ import { Resend } from "resend";
 import OrderHistoryEmailTemplate from "@/email/OrderHistoryEmailTemplate";
 
 const resend = new Resend(process.env.RESEND_API_KEY as string);
-const ITEMS_PER_PAGE = 6;
 
 export const userOrderExists = async (productId: string, email: string) => {
   const order = await db.order.findFirst({
@@ -22,9 +21,10 @@ export const userOrderExists = async (productId: string, email: string) => {
 
 export const fetchFilteredProducts = async (
   query: string,
-  currentPage: number
+  currentPage: number,
+  itemsPerPage: number
 ) => {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  const offset = (currentPage - 1) * itemsPerPage;
   let priceFilter = {};
 
   // Try to parse the query as an integer
@@ -35,7 +35,7 @@ export const fetchFilteredProducts = async (
 
   const products = await db.product.findMany({
     skip: offset,
-    take: ITEMS_PER_PAGE,
+    take: itemsPerPage,
     where: {
       OR: [
         { name: { contains: query, mode: "insensitive" } },
@@ -56,7 +56,7 @@ export const fetchFilteredProducts = async (
   return products;
 };
 
-export const fetchProductsPage = async (query: string) => {
+export const fetchProductsPage = async (query: string, itemsPerPage: number) => {
   let priceFilter = {};
 
   // Try to parse the query as an integer
@@ -75,7 +75,7 @@ export const fetchProductsPage = async (query: string) => {
     },
   });
 
-  const totalPages = Math.ceil(Number(count) / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(Number(count) / itemsPerPage);
   return totalPages;
 };
 

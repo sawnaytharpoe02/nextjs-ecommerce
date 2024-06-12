@@ -11,25 +11,66 @@ import {
 } from "@/components/ui/pagination";
 import { generatePagination } from "@/utils/generatePagination";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 
-import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const PagePagination = ({ totalPages }: { totalPages: number }) => {
+import React, { SetStateAction, useState } from "react";
+
+const PagePagination = ({
+  totalPages,
+  itemsPerPage,
+}: {
+  totalPages: number;
+  itemsPerPage: number;
+}) => {
+  const router = useRouter()
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get("page")) || 1;
+  const [selectedPageCount, setSelectedPageCount] =
+    useState<number>(itemsPerPage);
 
   const createPageURL = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", pageNumber.toString());
+    params.set("count", selectedPageCount?.toString());
     return `${pathname}?${params.toString()}`;
   };
+
+  const createPageCount = (value: number) => {
+    setSelectedPageCount(value);
+    const params = new URLSearchParams(searchParams);
+    params.set("count", value.toString());
+    params.set("page", '1'); // Reset to the first page when count changes
+    const newURL = `${pathname}?${params.toString()}`;
+    router.push(newURL);
+  };
+
 
   const allPages = generatePagination(currentPage, totalPages);
 
   return (
-    <div>
+    <div className="w-full flex items-center justify-between">
+      <div className="w-full flex items-center gap-2">
+        <p className="text-sm">Items Per Page</p>
+        <Select onValueChange={(value) => createPageCount(Number(value))}>
+          <SelectTrigger className="w-fit">
+            <SelectValue placeholder={itemsPerPage} />
+          </SelectTrigger>
+          <SelectContent className="w-fit">
+            <SelectItem value="6">6</SelectItem>
+            <SelectItem value="12">12</SelectItem>
+            <SelectItem value="24">24</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <Pagination>
         <PaginationContent>
           <PaginationItem>
